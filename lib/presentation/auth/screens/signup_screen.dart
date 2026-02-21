@@ -3,41 +3,62 @@ import 'package:flutter/material.dart';
 import 'package:student_link_app/core/constants/colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:student_link_app/presentation/common/widgets/glass_container.dart';
-import 'package:student_link_app/presentation/auth/screens/signup_screen.dart';
 import 'package:get_it/get_it.dart';
 import '../../../data/datasources/firebase_auth_service.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _departmentController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
+    _departmentController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleSignUp() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     try {
       final authService = GetIt.I<FirebaseAuthService>();
-      await authService.signInWithEmail(
-        _emailController.text.trim(),
-        _passwordController.text,
+      
+      // Check if email ends with .edu
+      if (!_emailController.text.toLowerCase().endsWith('.edu')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please use a valid student email ending with .edu'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      await authService.signUpWithEmail(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        name: _nameController.text.trim(),
+        department: _departmentController.text.trim(),
       );
 
       if (mounted) {
@@ -47,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login failed: ${e.toString()}'),
+            content: Text(e.toString()),
             backgroundColor: AppColors.error,
           ),
         );
@@ -64,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Decor elements
+          // Background Decor
           Positioned(
             top: -100,
             right: -100,
@@ -74,7 +95,13 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: BoxDecoration(
                 color: AppColors.primary.withOpacity(0.3),
                 shape: BoxShape.circle,
-                boxShadow: const [BoxShadow(blurRadius: 100, spreadRadius: 50, color: AppColors.primary)],
+                boxShadow: const [
+                  BoxShadow(
+                    blurRadius: 100,
+                    spreadRadius: 50,
+                    color: AppColors.primary,
+                  )
+                ],
               ),
             ),
           ),
@@ -87,11 +114,18 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: BoxDecoration(
                 color: AppColors.accent.withOpacity(0.2),
                 shape: BoxShape.circle,
-                boxShadow: const [BoxShadow(blurRadius: 80, spreadRadius: 40, color: AppColors.accent)],
+                boxShadow: const [
+                  BoxShadow(
+                    blurRadius: 80,
+                    spreadRadius: 40,
+                    color: AppColors.accent,
+                  )
+                ],
               ),
             ),
           ),
-          // Form Content
+
+          // Content
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -103,32 +137,58 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        "Student Link",
+                        "Join Student Link",
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 40),
+                        style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 32),
                       ).animate().fade(duration: 500.ms).slideY(begin: -0.2),
+                      
                       const SizedBox(height: 8),
+                      
                       Text(
-                        "The ultimate campus networking platform",
+                        "Connect with your campus community",
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.primaryText.withOpacity(0.7)
+                          color: AppColors.primaryText.withOpacity(0.7),
                         ),
                       ).animate().fade(delay: 200.ms).slideY(begin: -0.2),
-                      
-                      const SizedBox(height: 48),
+
+                      const SizedBox(height: 32),
 
                       GlassContainer(
-                        height: 320,
+                        height: null,
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            // Name field
+                            TextFormField(
+                              controller: _nameController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: 'Full Name',
+                                prefixIcon: const Icon(CupertinoIcons.person, color: AppColors.primary),
+                                filled: true,
+                                fillColor: AppColors.surface.withOpacity(0.5),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your name';
+                                }
+                                return null;
+                              },
+                            ),
+                            
+                            const SizedBox(height: 16),
+
+                            // Email field
                             TextFormField(
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
-                                hintText: 'Student Email ending in .edu',
+                                hintText: 'Student Email (.edu)',
                                 prefixIcon: const Icon(CupertinoIcons.mail, color: AppColors.primary),
                                 filled: true,
                                 fillColor: AppColors.surface.withOpacity(0.5),
@@ -147,7 +207,34 @@ class _LoginScreenState extends State<LoginScreen> {
                                 return null;
                               },
                             ),
+
                             const SizedBox(height: 16),
+
+                            // Department field
+                            TextFormField(
+                              controller: _departmentController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: 'Department (e.g., Computer Science)',
+                                prefixIcon: const Icon(CupertinoIcons.building_2_fill, color: AppColors.primary),
+                                filled: true,
+                                fillColor: AppColors.surface.withOpacity(0.5),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your department';
+                                }
+                                return null;
+                              },
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Password field
                             TextFormField(
                               controller: _passwordController,
                               obscureText: _obscurePassword,
@@ -173,22 +260,71 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter your password';
+                                  return 'Please enter a password';
+                                }
+                                if (value.length < 6) {
+                                  return 'Password must be at least 6 characters';
                                 }
                                 return null;
                               },
                             ),
+
+                            const SizedBox(height: 16),
+
+                            // Confirm password field
+                            TextFormField(
+                              controller: _confirmPasswordController,
+                              obscureText: _obscureConfirmPassword,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: 'Confirm Password',
+                                prefixIcon: const Icon(CupertinoIcons.lock_fill, color: AppColors.primary),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureConfirmPassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                                    color: AppColors.secondaryText,
+                                  ),
+                                  onPressed: () {
+                                    setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                                  },
+                                ),
+                                filled: true,
+                                fillColor: AppColors.surface.withOpacity(0.5),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please confirm your password';
+                                }
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match';
+                                }
+                                return null;
+                              },
+                            ),
+
                             const SizedBox(height: 24),
+
+                            // Sign up button
                             Container(
                               width: double.infinity,
                               height: 50,
                               decoration: BoxDecoration(
                                 gradient: AppColors.primaryGradient,
                                 borderRadius: BorderRadius.circular(12),
-                                boxShadow: const [BoxShadow(color: AppColors.primary, blurRadius: 15, spreadRadius: -5)],
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: AppColors.primary,
+                                    blurRadius: 15,
+                                    spreadRadius: -5,
+                                  )
+                                ],
                               ),
                               child: ElevatedButton(
-                                onPressed: _isLoading ? null : _handleLogin,
+                                onPressed: _isLoading ? null : _handleSignUp,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   shadowColor: Colors.transparent,
@@ -206,8 +342,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       )
                                     : Text(
-                                        "LOGIN",
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                                        "SIGN UP",
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                               ),
                             ),
@@ -216,14 +354,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       ).animate().fade(delay: 400.ms, duration: 400.ms).scaleXY(begin: 0.9, end: 1),
 
                       const SizedBox(height: 24),
+
                       TextButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const SignupScreen()),
-                          );
+                          Navigator.pop(context);
                         },
-                        child: const Text("Don't have an account? Sign Up", style: TextStyle(color: AppColors.accent)),
+                        child: const Text(
+                          "Already have an account? Sign In",
+                          style: TextStyle(color: AppColors.accent),
+                        ),
                       ).animate().fade(delay: 600.ms),
                     ],
                   ),

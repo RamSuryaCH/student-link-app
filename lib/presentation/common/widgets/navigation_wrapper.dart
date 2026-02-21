@@ -2,7 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:student_link_app/core/constants/colors.dart';
 import 'package:student_link_app/presentation/pulse/screens/feed_screen.dart';
+import 'package:student_link_app/presentation/connect/screens/connect_screen.dart';
+import 'package:student_link_app/presentation/messaging/screens/chat_list_screen.dart';
+import 'package:student_link_app/presentation/clubs/screens/clubs_screen.dart';
 import 'package:student_link_app/presentation/study_room/screens/study_room_screen.dart';
+import 'package:student_link_app/presentation/profile/screens/profile_screen.dart';
 
 class NavigationWrapper extends StatefulWidget {
   const NavigationWrapper({Key? key}) : super(key: key);
@@ -16,10 +20,11 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
 
   final List<Widget> _screens = [
     const FeedScreen(),
-    const Scaffold(body: Center(child: Text("Connect / Networking"))),
-    const Scaffold(body: Center(child: Text("AnonySpace"))),
+    const ConnectScreen(),
+    const ChatListScreen(),
+    const ClubsScreen(),
     const StudyRoomScreen(),
-    const Scaffold(body: Center(child: Text("Profile"))),
+    const ProfileScreen(),
   ];
 
   @override
@@ -47,25 +52,36 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
               _currentIndex = index;
             });
           },
+          type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.home),
+              activeIcon: Icon(CupertinoIcons.home_fill),
               label: 'Pulse',
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.person_2),
+              activeIcon: Icon(CupertinoIcons.person_2_fill),
               label: 'Connect',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.eye_slash),
-              label: 'Anonymity',
+              icon: Icon(CupertinoIcons.chat_bubble_2),
+              activeIcon: Icon(CupertinoIcons.chat_bubble_2_fill),
+              label: 'Messages',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.building_2_fill),
+              activeIcon: Icon(CupertinoIcons.building_2_fill),
+              label: 'Clubs',
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.book),
+              activeIcon: Icon(CupertinoIcons.book_fill),
               label: 'Study',
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.profile_circled),
+              activeIcon: Icon(CupertinoIcons.person_fill),
               label: 'Profile',
             ),
           ],
