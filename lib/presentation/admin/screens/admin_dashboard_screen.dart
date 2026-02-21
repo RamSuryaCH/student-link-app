@@ -92,10 +92,10 @@ class _UserManagementTab extends StatelessWidget {
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: AppColors.primary,
-                  backgroundImage: user.photoUrl != null
-                      ? CachedNetworkImageProvider(user.photoUrl!)
+                  backgroundImage: user.profilePhotoUrl != null
+                      ? CachedNetworkImageProvider(user.profilePhotoUrl!)
                       : null,
-                  child: user.photoUrl == null
+                  child: user.profilePhotoUrl == null
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
                 ),

@@ -96,4 +96,7 @@ class Message extends Equatable {
         isRead,
         mediaUrl,
       ];
+
+  // Alias for createdAt for backwards compatibility
+  DateTime get timestamp => createdAt;
 }

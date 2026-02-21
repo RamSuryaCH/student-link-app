@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:logger/logger.dart';
 import '../../domain/entities/post.dart';
@@ -9,6 +10,18 @@ class PostService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final Logger _logger = Logger();
+
+  // Alias for getPostsFeed for backward compatibility
+  Stream<List<Post>> getFeedPosts({int limit = 20}) => getPostsFeed(limit: limit);
+
+  // Like a post (uses current user ID)
+  Future<void> likePost(String postId) {
+    final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid ?? '';
+    return toggleLike(postId, userId);
+  }
+
+  // Get current user ID
+  String? get currentUserId => firebase_auth.FirebaseAuth.instance.currentUser?.uid;
 
   // Create a new post
   Future<Post> createPost({

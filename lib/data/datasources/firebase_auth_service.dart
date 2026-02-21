@@ -9,6 +9,9 @@ class FirebaseAuthService {
   // Stream of auth changes
   Stream<firebase_auth.User?> get userChanges => _firebaseAuth.authStateChanges();
 
+  // Current authenticated user (synchronous)
+  firebase_auth.User? get currentUser => _firebaseAuth.currentUser;
+
   Future<UserEntity?> signInWithEmail(String email, String password) async {
     try {
       final credential = await _firebaseAuth.signInWithEmailAndPassword(

@@ -8,6 +8,10 @@ class ChatRoom extends Equatable {
   final String? lastMessageSenderId;
   final Map<String, int> unreadCounts; // userId -> unreadCount
   final DateTime createdAt;
+  // Display fields populated by the UI layer
+  final String? otherUserName;
+  final String? otherUserPhotoUrl;
+  final int unreadCount;
 
   const ChatRoom({
     required this.id,
@@ -17,6 +21,9 @@ class ChatRoom extends Equatable {
     this.lastMessageSenderId,
     this.unreadCounts = const {},
     required this.createdAt,
+    this.otherUserName,
+    this.otherUserPhotoUrl,
+    this.unreadCount = 0,
   });
 
   Map<String, dynamic> toMap() {
@@ -53,6 +60,9 @@ class ChatRoom extends Equatable {
     String? lastMessageSenderId,
     Map<String, int>? unreadCounts,
     DateTime? createdAt,
+    String? otherUserName,
+    String? otherUserPhotoUrl,
+    int? unreadCount,
   }) {
     return ChatRoom(
       id: id ?? this.id,
@@ -62,6 +72,9 @@ class ChatRoom extends Equatable {
       lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
       unreadCounts: unreadCounts ?? this.unreadCounts,
       createdAt: createdAt ?? this.createdAt,
+      otherUserName: otherUserName ?? this.otherUserName,
+      otherUserPhotoUrl: otherUserPhotoUrl ?? this.otherUserPhotoUrl,
+      unreadCount: unreadCount ?? this.unreadCount,
     );
   }
 
@@ -74,5 +87,8 @@ class ChatRoom extends Equatable {
         lastMessageSenderId,
         unreadCounts,
         createdAt,
+        otherUserName,
+        otherUserPhotoUrl,
+        unreadCount,
       ];
 }

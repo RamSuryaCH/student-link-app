@@ -172,7 +172,7 @@ class _ChatDetailContentState extends State<_ChatDetailContent> {
                     );
                   }
 
-                  final currentUserId = getIt<MessagingService>().currentUserId;
+                  final currentUserId = getIt<MessagingService>().currentUserId ?? '';
 
                   return ListView.builder(
                     controller: _scrollController,

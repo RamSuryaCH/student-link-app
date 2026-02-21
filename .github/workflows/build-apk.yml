@@ -9,6 +9,8 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -40,3 +42,23 @@ jobs:
         with:
           name: StudentLink-APK
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Get version from pubspec
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: StudentLink v${{ steps.version.outputs.version }}
+          body: |
+            ## StudentLink App APK
+
+            Download the APK below and install it on your Android device.
+
+            > **Note:** You may need to enable "Install from unknown sources" in your Android settings.
+          files: build/app/outputs/flutter-apk/app-release.apk
+          make_latest: true
