@@ -11,11 +11,12 @@ import 'package:student_link_app/presentation/common/widgets/navigation_wrapper.
 import 'package:get_it/get_it.dart';
 import 'package:student_link_app/data/datasources/firebase_auth_service.dart';
 import 'package:student_link_app/data/datasources/push_notification_service.dart';
+import 'firebase_options.dart';
 
 // Background message handler
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   print('Handling background message: ${message.messageId}');
 }
 
@@ -29,7 +30,9 @@ void main() async {
   ]);
   
   // Initialize Firebase
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // Setup background message handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
