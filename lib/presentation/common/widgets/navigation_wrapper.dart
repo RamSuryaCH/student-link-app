@@ -56,7 +56,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
           items: const [
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.home),
-              activeIcon: Icon(CupertinoIcons.home_fill),
+              activeIcon: Icon(CupertinoIcons.house_fill),
               label: 'Pulse',
             ),
             BottomNavigationBarItem(

@@ -10,6 +10,7 @@ import 'package:student_link_app/presentation/pulse/bloc/feed_event.dart';
 import 'package:student_link_app/presentation/pulse/bloc/feed_state.dart';
 import 'package:student_link_app/domain/entities/post.dart';
 import 'package:student_link_app/data/datasources/post_service.dart';
+import 'package:student_link_app/data/datasources/firebase_auth_service.dart';
 import 'package:student_link_app/core/di/injection.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -303,7 +304,7 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasLiked = post.likes.contains(getIt<PostService>().currentUserId);
+    final hasLiked = post.likedBy.contains(getIt<FirebaseAuthService>().currentUser?.uid ?? '');
 
     return GlassContainer(
       margin: const EdgeInsets.only(bottom: 16),
@@ -314,10 +315,10 @@ class PostCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 backgroundColor: AppColors.primary,
-                backgroundImage: post.authorPhotoUrl != null
-                    ? CachedNetworkImageProvider(post.authorPhotoUrl!)
+                backgroundImage: post.userPhotoUrl != null
+                    ? CachedNetworkImageProvider(post.userPhotoUrl!)
                     : null,
-                child: post.authorPhotoUrl == null
+                child: post.userPhotoUrl == null
                     ? const Icon(Icons.person, color: Colors.white)
                     : null,
               ),
@@ -327,7 +328,7 @@ class PostCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      post.authorName,
+                      post.userName,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -353,12 +354,12 @@ class PostCard extends StatelessWidget {
             post.content,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          if (post.imageUrl != null) ...[
+          if (post.imageUrls.isNotEmpty) ...[
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: CachedNetworkImage(
-                imageUrl: post.imageUrl!,
+                imageUrl: post.imageUrls[0],
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: 200,
@@ -383,14 +384,14 @@ class PostCard extends StatelessWidget {
             children: [
               _buildInteractionButton(
                 hasLiked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
-                post.likes.length.toString(),
+                post.likedBy.length.toString(),
                 context,
                 hasLiked ? AppColors.error : AppColors.secondaryText,
                 onTap: () => context.read<FeedBloc>().add(LikePostEvent(post.id)),
               ),
               _buildInteractionButton(
                 CupertinoIcons.chat_bubble,
-                post.commentCount.toString(),
+                post.commentsCount.toString(),
                 context,
                 AppColors.secondaryText,
                 onTap: () => _showCommentsSheet(context),
@@ -489,11 +490,11 @@ class PostCard extends StatelessWidget {
               ),
               const Divider(height: 1),
               Expanded(
-                child: post.commentCount == 0
+                child: post.commentsCount == 0
                     ? const Center(child: Text('No comments yet'))
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: post.commentCount,
+                        itemCount: post.commentsCount,
                         itemBuilder: (context, index) {
                           return const ListTile(
                             title: Text('Sample comment'),

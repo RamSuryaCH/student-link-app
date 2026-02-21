@@ -8,9 +8,9 @@ import 'package:student_link_app/presentation/messaging/bloc/messaging_event.dar
 import 'package:student_link_app/presentation/messaging/bloc/messaging_state.dart';
 import 'package:student_link_app/presentation/messaging/screens/chat_detail_screen.dart';
 import 'package:student_link_app/data/datasources/messaging_service.dart';
+import 'package:student_link_app/data/datasources/firebase_auth_service.dart';
 import 'package:student_link_app/core/di/injection.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class ChatListScreen extends StatelessWidget {
@@ -95,22 +95,27 @@ class _ChatListContent extends StatelessWidget {
               itemCount: state.chatRooms.length,
               itemBuilder: (context, index) {
                 final chatRoom = state.chatRooms[index];
+                final currentUserId = getIt<FirebaseAuthService>().currentUser?.uid ?? '';
+                final unreadCount = chatRoom.unreadCounts[currentUserId] ?? 0;
+                final otherUserId = chatRoom.participantIds.firstWhere(
+                  (id) => id != currentUserId,
+                  orElse: () => chatRoom.participantIds.first,
+                );
+                final displaySuffix = otherUserId.length > 6
+                    ? otherUserId.substring(0, 6)
+                    : otherUserId;
+                final otherUserName = 'User $displaySuffix';
                 return GlassContainer(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     leading: Stack(
                       children: [
-                        CircleAvatar(
+                        const CircleAvatar(
                           radius: 28,
                           backgroundColor: AppColors.primary,
-                          backgroundImage: chatRoom.otherUserPhotoUrl != null
-                              ? CachedNetworkImageProvider(chatRoom.otherUserPhotoUrl!)
-                              : null,
-                          child: chatRoom.otherUserPhotoUrl == null
-                              ? const Icon(Icons.person, color: Colors.white)
-                              : null,
+                          child: Icon(Icons.person, color: Colors.white),
                         ),
-                        if (chatRoom.unreadCount > 0)
+                        if (unreadCount > 0)
                           Positioned(
                             right: 0,
                             top: 0,
@@ -121,7 +126,7 @@ class _ChatListContent extends StatelessWidget {
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
-                                chatRoom.unreadCount > 9 ? '9+' : '${chatRoom.unreadCount}',
+                                unreadCount > 9 ? '9+' : '$unreadCount',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,
@@ -133,25 +138,25 @@ class _ChatListContent extends StatelessWidget {
                       ],
                     ),
                     title: Text(
-                      chatRoom.otherUserName,
+                      otherUserName,
                       style: TextStyle(
-                        fontWeight: chatRoom.unreadCount > 0
+                        fontWeight: unreadCount > 0
                             ? FontWeight.bold
                             : FontWeight.normal,
                       ),
                     ),
                     subtitle: Text(
-                      chatRoom.lastMessage,
+                      chatRoom.lastMessage ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: chatRoom.unreadCount > 0
+                        color: unreadCount > 0
                             ? Colors.white
                             : AppColors.secondaryText,
                       ),
                     ),
                     trailing: Text(
-                      timeago.format(chatRoom.lastMessageTime),
+                      timeago.format(chatRoom.lastMessageTime ?? chatRoom.createdAt),
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.secondaryText,
@@ -163,8 +168,8 @@ class _ChatListContent extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => ChatDetailScreen(
                             chatRoomId: chatRoom.id,
-                            otherUserName: chatRoom.otherUserName,
-                            otherUserPhotoUrl: chatRoom.otherUserPhotoUrl,
+                            otherUserName: otherUserName,
+                            otherUserPhotoUrl: null,
                           ),
                         ),
                       );

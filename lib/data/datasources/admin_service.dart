@@ -224,4 +224,97 @@ class AdminService {
       rethrow;
     }
   }
+
+  // Ban user (convenience wrapper)
+  Future<void> banUser(String userId) => toggleBanUser(userId, true);
+
+  // Update user role
+  Future<void> updateUserRole(String userId, String role) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'role': role,
+      });
+    } catch (e) {
+      _logger.e('Error updating user role: $e');
+      rethrow;
+    }
+  }
+
+  // Get reported content as a stream of maps for display
+  Stream<List<Map<String, dynamic>>> getReportedContent() {
+    try {
+      return _firestore
+          .collection('posts')
+          .where('isReported', isEqualTo: true)
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map((snapshot) {
+        return snapshot.docs.map((doc) {
+          final data = doc.data();
+          return {
+            'id': doc.id,
+            'type': 'post',
+            'content': data['content'] ?? '',
+            'reportCount': 1,
+          };
+        }).toList();
+      });
+    } catch (e) {
+      _logger.e('Error getting reported content: $e');
+      rethrow;
+    }
+  }
+
+  // Delete content by id and type
+  Future<void> deleteContent(String id, String type) async {
+    try {
+      if (type == 'post') {
+        await _firestore.collection('posts').doc(id).delete();
+      } else if (type == 'anonymous_post') {
+        await _firestore.collection('anonymous_posts').doc(id).delete();
+      }
+    } catch (e) {
+      _logger.e('Error deleting content: $e');
+      rethrow;
+    }
+  }
+
+  // Dismiss report (mark as not reported)
+  Future<void> dismissReport(String id) => approvePost(id);
+
+  // Get pending club approvals (alias)
+  Stream<List<Club>> getPendingClubApprovals() => getPendingClubs();
+
+  // Get app statistics
+  Future<Map<String, dynamic>> getAppStatistics() async {
+    try {
+      final usersCount = await _firestore.collection('users').count().get();
+      final postsCount = await _firestore.collection('posts').count().get();
+      final clubsCount = await _firestore.collection('clubs').count().get();
+      final messagesCount = await _firestore.collection('chat_rooms').count().get();
+      final connectionsSnapshot = await _firestore.collection('connection_requests')
+          .where('status', isEqualTo: 'accepted')
+          .count()
+          .get();
+
+      return {
+        'totalUsers': usersCount.count ?? 0,
+        'activeUsers': 0,
+        'totalPosts': postsCount.count ?? 0,
+        'totalClubs': clubsCount.count ?? 0,
+        'totalMessages': messagesCount.count ?? 0,
+        'totalConnections': connectionsSnapshot.count ?? 0,
+      };
+    } catch (e) {
+      _logger.e('Error getting app statistics: $e');
+      return {
+        'totalUsers': 0,
+        'activeUsers': 0,
+        'totalPosts': 0,
+        'totalClubs': 0,
+        'totalMessages': 0,
+        'totalConnections': 0,
+      };
+    }
+  }
 }
