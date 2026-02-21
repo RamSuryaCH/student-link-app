@@ -92,10 +92,10 @@ class _UserManagementTab extends StatelessWidget {
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: AppColors.primary,
-                  backgroundImage: user.photoUrl != null
-                      ? CachedNetworkImageProvider(user.photoUrl!)
+                  backgroundImage: user.profilePhotoUrl != null
+                      ? CachedNetworkImageProvider(user.profilePhotoUrl!)
                       : null,
-                  child: user.photoUrl == null
+                  child: user.profilePhotoUrl == null
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
                 ),
@@ -164,7 +164,7 @@ class _ContentModerationTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final adminService = getIt<AdminService>();
 
-    return StreamBuilder(
+    return StreamBuilder<List<Map<String, dynamic>>>(
       stream: adminService.getReportedContent(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -259,7 +259,7 @@ class _ClubApprovalTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final adminService = getIt<AdminService>();
 
-    return StreamBuilder(
+    return StreamBuilder<List<Club>>(
       stream: adminService.getPendingClubApprovals(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -382,7 +382,7 @@ class _StatisticsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final adminService = getIt<AdminService>();
 
-    return FutureBuilder(
+    return FutureBuilder<Map<String, dynamic>>(
       future: adminService.getAppStatistics(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

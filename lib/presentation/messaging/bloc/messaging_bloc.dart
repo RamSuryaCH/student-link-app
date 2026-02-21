@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:student_link_app/data/datasources/messaging_service.dart';
 import 'package:student_link_app/presentation/messaging/bloc/messaging_event.dart';
@@ -25,7 +26,8 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
     emit(const ChatRoomsLoading());
     try {
       await _chatRoomsSubscription?.cancel();
-      _chatRoomsSubscription = _messagingService.getChatRooms().listen(
+      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid ?? '';
+      _chatRoomsSubscription = _messagingService.getUserChatRooms(userId).listen(
         (chatRooms) {
           if (!isClosed) {
             emit(ChatRoomsLoaded(chatRooms));
@@ -71,10 +73,17 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
     Emitter<MessagingState> emit,
   ) async {
     try {
+      final currentUserId = firebase_auth.FirebaseAuth.instance.currentUser?.uid ?? '';
+      final parts = event.chatRoomId.split('_');
+      final receiverId = parts.firstWhere(
+        (id) => id != currentUserId,
+        orElse: () => parts.last,
+      );
       await _messagingService.sendMessage(
-        chatRoomId: event.chatRoomId,
+        chatId: event.chatRoomId,
+        senderId: currentUserId,
+        receiverId: receiverId,
         content: event.content,
-        imageUrl: event.imageUrl,
       );
     } catch (e) {
       emit(MessagingError(e.toString()));
@@ -86,7 +95,8 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
     Emitter<MessagingState> emit,
   ) async {
     try {
-      await _messagingService.markMessagesAsRead(event.chatRoomId);
+      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid ?? '';
+      await _messagingService.markMessagesAsRead(event.chatRoomId, userId);
     } catch (e) {
       // Silent fail
     }

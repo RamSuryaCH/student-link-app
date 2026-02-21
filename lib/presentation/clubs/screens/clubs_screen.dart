@@ -154,7 +154,7 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
                       return;
                     }
 
-                    final currentUser = authService.userChanges.value;
+                    final currentUser = authService.currentUser;
                     if (currentUser != null) {
                       try {
                         await clubService.createClub(
@@ -270,7 +270,7 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
   }
 
   Widget _buildMyClubsTab() {
-    final currentUser = authService.userChanges.value;
+    final currentUser = authService.currentUser;
     if (currentUser == null) {
       return const Center(child: Text('Please login'));
     }
@@ -317,7 +317,7 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
   }
 
   Widget _buildClubCard(Club club) {
-    final currentUser = authService.userChanges.value;
+    final currentUser = authService.currentUser;
     final isMember = currentUser != null && club.memberIds.contains(currentUser.uid);
     final isPending = currentUser != null && club.pendingMemberIds.contains(currentUser.uid);
 

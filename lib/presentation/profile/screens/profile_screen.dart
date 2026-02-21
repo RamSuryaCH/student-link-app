@@ -169,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = authService.userChanges.value;
+    final currentUser = authService.currentUser;
     
     if (currentUser == null) {
       return const Scaffold(

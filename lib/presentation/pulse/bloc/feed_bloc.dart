@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:student_link_app/data/datasources/post_service.dart';
 import 'package:student_link_app/presentation/pulse/bloc/feed_event.dart';
@@ -23,7 +24,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     emit(const FeedLoading());
     try {
       await _feedSubscription?.cancel();
-      _feedSubscription = _postService.getFeedPosts().listen(
+      _feedSubscription = _postService.getPostsFeed().listen(
         (posts) {
           if (!isClosed) {
             emit(FeedLoaded(posts));
@@ -48,9 +49,12 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   Future<void> _onCreatePost(CreatePostEvent event, Emitter<FeedState> emit) async {
     emit(const PostCreating());
     try {
+      final user = firebase_auth.FirebaseAuth.instance.currentUser;
       await _postService.createPost(
+        userId: user?.uid ?? '',
+        userName: user?.displayName ?? user?.email ?? 'User',
+        userPhotoUrl: user?.photoURL,
         content: event.content,
-        imageUrl: event.imageUrl,
       );
       emit(const PostCreated());
       // Reload feed
@@ -62,7 +66,8 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
   Future<void> _onLikePost(LikePostEvent event, Emitter<FeedState> emit) async {
     try {
-      await _postService.likePost(event.postId);
+      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid ?? '';
+      await _postService.toggleLike(event.postId, userId);
     } catch (e) {
       // Silent fail - the stream will update anyway
     }
@@ -70,8 +75,12 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
   Future<void> _onAddComment(AddCommentEvent event, Emitter<FeedState> emit) async {
     try {
+      final user = firebase_auth.FirebaseAuth.instance.currentUser;
       await _postService.addComment(
         postId: event.postId,
+        userId: user?.uid ?? '',
+        userName: user?.displayName ?? user?.email ?? 'User',
+        userPhotoUrl: user?.photoURL,
         content: event.content,
       );
     } catch (e) {

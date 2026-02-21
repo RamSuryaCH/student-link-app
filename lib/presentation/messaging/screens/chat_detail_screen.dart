@@ -7,6 +7,7 @@ import 'package:student_link_app/presentation/messaging/bloc/messaging_bloc.dart
 import 'package:student_link_app/presentation/messaging/bloc/messaging_event.dart';
 import 'package:student_link_app/presentation/messaging/bloc/messaging_state.dart';
 import 'package:student_link_app/data/datasources/messaging_service.dart';
+import 'package:student_link_app/data/datasources/firebase_auth_service.dart';
 import 'package:student_link_app/core/di/injection.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -172,7 +173,7 @@ class _ChatDetailContentState extends State<_ChatDetailContent> {
                     );
                   }
 
-                  final currentUserId = getIt<MessagingService>().currentUserId;
+                  final currentUserId = getIt<FirebaseAuthService>().currentUser?.uid ?? '';
 
                   return ListView.builder(
                     controller: _scrollController,
@@ -237,7 +238,7 @@ class _ChatDetailContentState extends State<_ChatDetailContent> {
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: Text(
-                                timeago.format(message.timestamp),
+                                timeago.format(message.createdAt),
                                 style: const TextStyle(
                                   fontSize: 11,
                                   color: AppColors.secondaryText,
