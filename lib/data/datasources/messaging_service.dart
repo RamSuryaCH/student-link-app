@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:logger/logger.dart';
 import '../../domain/entities/message.dart';
@@ -9,6 +10,47 @@ class MessagingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final Logger _logger = Logger();
+
+  // Get current user ID
+  String? get currentUserId => firebase_auth.FirebaseAuth.instance.currentUser?.uid;
+
+  // Get chat rooms for current user
+  Stream<List<ChatRoom>> getChatRooms() {
+    final userId = currentUserId ?? '';
+    return getUserChatRooms(userId);
+  }
+
+  // Mark messages as read for current user
+  Future<void> markAsRead(String chatId) {
+    final userId = currentUserId ?? '';
+    return markMessagesAsRead(chatId, userId);
+  }
+
+  // Send a text message in a chat room (automatically resolves sender/receiver)
+  Future<Message> sendTextMessage({
+    required String chatId,
+    required String content,
+  }) async {
+    try {
+      final senderId = currentUserId ?? '';
+      final chatRoomDoc = await _firestore.collection('chat_rooms').doc(chatId).get();
+      if (!chatRoomDoc.exists) throw Exception('Chat room not found');
+      final chatRoom = ChatRoom.fromMap(chatRoomDoc.data()!);
+      final receiverId = chatRoom.participantIds.firstWhere(
+        (id) => id != senderId,
+        orElse: () => '',
+      );
+      return sendMessage(
+        chatId: chatId,
+        senderId: senderId,
+        receiverId: receiverId,
+        content: content,
+      );
+    } catch (e) {
+      _logger.e('Error sending text message: $e');
+      rethrow;
+    }
+  }
 
   // Get or create chat room between two users
   Future<String> getOrCreateChatRoom(String userId1, String userId2) async {

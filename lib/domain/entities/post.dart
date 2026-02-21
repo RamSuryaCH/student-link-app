@@ -108,4 +108,11 @@ class Post extends Equatable {
         createdAt,
         isReported,
       ];
+
+  // Alias getters for backwards compatibility
+  List<String> get likes => likedBy;
+  String get authorName => userName;
+  String? get authorPhotoUrl => userPhotoUrl;
+  String? get imageUrl => imageUrls.isNotEmpty ? imageUrls.first : null;
+  int get commentCount => commentsCount;
 }

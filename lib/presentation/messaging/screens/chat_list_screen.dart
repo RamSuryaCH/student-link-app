@@ -133,7 +133,7 @@ class _ChatListContent extends StatelessWidget {
                       ],
                     ),
                     title: Text(
-                      chatRoom.otherUserName,
+                      chatRoom.otherUserName ?? 'Unknown',
                       style: TextStyle(
                         fontWeight: chatRoom.unreadCount > 0
                             ? FontWeight.bold
@@ -141,7 +141,7 @@ class _ChatListContent extends StatelessWidget {
                       ),
                     ),
                     subtitle: Text(
-                      chatRoom.lastMessage,
+                      chatRoom.lastMessage ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -151,7 +151,7 @@ class _ChatListContent extends StatelessWidget {
                       ),
                     ),
                     trailing: Text(
-                      timeago.format(chatRoom.lastMessageTime),
+                      timeago.format(chatRoom.lastMessageTime ?? DateTime.now()),
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.secondaryText,
@@ -163,7 +163,7 @@ class _ChatListContent extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => ChatDetailScreen(
                             chatRoomId: chatRoom.id,
-                            otherUserName: chatRoom.otherUserName,
+                            otherUserName: chatRoom.otherUserName ?? 'Unknown',
                             otherUserPhotoUrl: chatRoom.otherUserPhotoUrl,
                           ),
                         ),

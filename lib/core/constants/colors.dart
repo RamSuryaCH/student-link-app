@@ -12,6 +12,7 @@ class AppColors {
   static const Color success = Color(0xFF22C55E);
   static const Color warning = Color(0xFFFACC15);
   static const Color error = Color(0xFFEF4444);
+  static const Color info = Color(0xFF3B82F6);
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(

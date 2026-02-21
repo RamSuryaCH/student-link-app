@@ -53,7 +53,7 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
     setState(() => isSearching = true);
     
     try {
-      final currentUser = authService.userChanges.value;
+      final currentUser = authService.currentUser;
       if (currentUser != null) {
         final results = await connectionService.searchUsers(query, currentUser.uid);
         setState(() {
@@ -147,11 +147,11 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
   Widget _buildDiscoverTab() {
     return FutureBuilder<List<UserEntity>>(
       future: () async {
-        final currentUser = authService.userChanges.value;
+        final currentUser = authService.currentUser;
         if (currentUser != null) {
           return await connectionService.getSuggestedConnections(currentUser.uid);
         }
-        return [];
+        return <UserEntity>[];
       }(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -186,7 +186,7 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
   }
 
   Widget _buildRequestsTab() {
-    final currentUser = authService.userChanges.value;
+    final currentUser = authService.currentUser;
     if (currentUser == null) {
       return const Center(child: Text('Please login'));
     }
@@ -226,7 +226,7 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
   }
 
   Widget _buildConnectionsTab() {
-    final currentUser = authService.userChanges.value;
+    final currentUser = authService.currentUser;
     if (currentUser == null) {
       return const Center(child: Text('Please login'));
     }
@@ -324,7 +324,7 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
             ),
             child: ElevatedButton(
               onPressed: () async {
-                final currentUser = authService.userChanges.value;
+                final currentUser = authService.currentUser;
                 if (currentUser != null) {
                   try {
                     await connectionService.sendConnectionRequest(
@@ -410,7 +410,7 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
                 children: [
                   IconButton(
                     onPressed: () async {
-                      final currentUser = authService.userChanges.value;
+                      final currentUser = authService.currentUser;
                       if (currentUser != null) {
                         await connectionService.acceptConnectionRequest(
                           request.id,

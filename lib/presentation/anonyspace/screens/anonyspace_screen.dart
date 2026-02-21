@@ -106,7 +106,7 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
                   onPressed: () async {
                     if (_postController.text.trim().isEmpty) return;
 
-                    final currentUser = authService.userChanges.value;
+                    final currentUser = authService.currentUser;
                     if (currentUser != null) {
                       try {
                         await anonymousPostService.createAnonymousPost(
@@ -237,7 +237,7 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
   }
 
   Widget _buildAnonymousPostCard(AnonymousPost post) {
-    final currentUser = authService.userChanges.value;
+    final currentUser = authService.currentUser;
     final hasUpvoted = currentUser != null && post.upvotedBy.contains(currentUser.uid);
     final hasDownvoted = currentUser != null && post.downvotedBy.contains(currentUser.uid);
 

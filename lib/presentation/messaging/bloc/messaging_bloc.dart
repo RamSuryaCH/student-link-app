@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:student_link_app/data/datasources/messaging_service.dart';
 import 'package:student_link_app/presentation/messaging/bloc/messaging_event.dart';
 import 'package:student_link_app/presentation/messaging/bloc/messaging_state.dart';
-
 class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
   final MessagingService _messagingService;
   StreamSubscription? _chatRoomsSubscription;
@@ -25,8 +24,7 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
     emit(const ChatRoomsLoading());
     try {
       await _chatRoomsSubscription?.cancel();
-      _chatRoomsSubscription = _messagingService.getChatRooms().listen(
-        (chatRooms) {
+      _chatRoomsSubscription = _messagingService.getChatRooms().listen(        (chatRooms) {
           if (!isClosed) {
             emit(ChatRoomsLoaded(chatRooms));
           }
@@ -71,10 +69,9 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
     Emitter<MessagingState> emit,
   ) async {
     try {
-      await _messagingService.sendMessage(
-        chatRoomId: event.chatRoomId,
+      await _messagingService.sendTextMessage(
+        chatId: event.chatRoomId,
         content: event.content,
-        imageUrl: event.imageUrl,
       );
     } catch (e) {
       emit(MessagingError(e.toString()));
@@ -86,7 +83,7 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
     Emitter<MessagingState> emit,
   ) async {
     try {
-      await _messagingService.markMessagesAsRead(event.chatRoomId);
+      await _messagingService.markAsRead(event.chatRoomId);
     } catch (e) {
       // Silent fail
     }
