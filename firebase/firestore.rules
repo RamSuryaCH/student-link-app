@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // USERS COLLECTION
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth.uid == userId;
+      // Admin dashboard role-based access
+      allow update, delete: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+    }
+    
+    // POSTS COLLECTION (Pulse Feed)
+    match /posts/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null 
+                    && request.resource.data.authorId == request.auth.uid
+                    && request.resource.data.content is string
+                    && request.resource.data.content.size() <= 1000;
+      allow update, delete: if request.auth.uid == resource.data.authorId
+                            || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+    }
+
+    // ANONYSPACE COLLECTION
+    match /anony_posts/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      // Only author controls delete (authorId encrypted/anonymous but verifiable by function or rules if stored safely)
+      allow delete: if request.auth.uid == resource.data.authorId 
+                    || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+    }
+
+    // CLUBS COLLECTION
+    match /clubs/{clubId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth.uid in resource.data.adminIds;
+    }
+
+    // MESSAGES COLLECTION
+    match /chats/{chatId} {
+      // Must be a participant to read/write in a 1-to-1 chat
+      allow read, write: if request.auth != null && request.auth.uid in resource.data.participants;
+      
+      match /messages/{messageId} {
+        allow read: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        allow create: if request.auth != null 
+                      && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants
+                      && request.resource.data.senderId == request.auth.uid;
+      }
+    }
+  }
+}
