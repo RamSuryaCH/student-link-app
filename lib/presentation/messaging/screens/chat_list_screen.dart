@@ -97,12 +97,14 @@ class _ChatListContent extends StatelessWidget {
                 final chatRoom = state.chatRooms[index];
                 final currentUserId = getIt<FirebaseAuthService>().currentUser?.uid ?? '';
                 final unreadCount = chatRoom.unreadCounts[currentUserId] ?? 0;
-                final otherUserId = chatRoom.participantIds
-                    .where((id) => id != currentUserId)
-                    .isNotEmpty
-                    ? chatRoom.participantIds.firstWhere((id) => id != currentUserId)
-                    : chatRoom.participantIds.first;
-                final otherUserName = 'User ${otherUserId.substring(0, 6)}';
+                final otherUserId = chatRoom.participantIds.firstWhere(
+                  (id) => id != currentUserId,
+                  orElse: () => chatRoom.participantIds.first,
+                );
+                final displaySuffix = otherUserId.length > 6
+                    ? otherUserId.substring(0, 6)
+                    : otherUserId;
+                final otherUserName = 'User $displaySuffix';
                 return GlassContainer(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(

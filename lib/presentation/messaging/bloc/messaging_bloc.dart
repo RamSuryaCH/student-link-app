@@ -75,10 +75,12 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
     try {
       final currentUserId = firebase_auth.FirebaseAuth.instance.currentUser?.uid ?? '';
       final parts = event.chatRoomId.split('_');
-      final receiverId = parts.firstWhere(
-        (id) => id != currentUserId,
-        orElse: () => parts.last,
-      );
+      final receiverId = parts.length >= 2
+          ? parts.firstWhere(
+              (id) => id != currentUserId,
+              orElse: () => parts.last,
+            )
+          : '';
       await _messagingService.sendMessage(
         chatId: event.chatRoomId,
         senderId: currentUserId,

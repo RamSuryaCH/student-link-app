@@ -50,6 +50,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     emit(const PostCreating());
     try {
       final user = firebase_auth.FirebaseAuth.instance.currentUser;
+      // Note: imageUrl from event is not used since PostService.createPost takes File? images
       await _postService.createPost(
         userId: user?.uid ?? '',
         userName: user?.displayName ?? user?.email ?? 'User',
