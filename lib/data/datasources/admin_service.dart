@@ -17,7 +17,9 @@ class AdminService {
           .orderBy('createdAt', descending: true)
           .snapshots()
           .map((snapshot) {
-        return snapshot.docs.map((doc) => UserEntity.fromMap(doc.data())).toList();
+        return snapshot.docs
+            .map((doc) => UserEntity.fromMap(doc.data()))
+            .toList();
       });
     } catch (e) {
       _logger.e('Error getting all users: $e');
@@ -41,7 +43,10 @@ class AdminService {
   Future<void> deleteUser(String userId) async {
     try {
       // Delete user's posts
-      final posts = await _firestore.collection('posts').where('userId', isEqualTo: userId).get();
+      final posts = await _firestore
+          .collection('posts')
+          .where('userId', isEqualTo: userId)
+          .get();
       for (var doc in posts.docs) {
         await doc.reference.delete();
       }
@@ -89,7 +94,9 @@ class AdminService {
           .orderBy('reportCount', descending: true)
           .snapshots()
           .map((snapshot) {
-        return snapshot.docs.map((doc) => AnonymousPost.fromMap(doc.data())).toList();
+        return snapshot.docs
+            .map((doc) => AnonymousPost.fromMap(doc.data()))
+            .toList();
       });
     } catch (e) {
       _logger.e('Error getting reported anonymous posts: $e');
@@ -187,7 +194,8 @@ class AdminService {
       final usersCount = await _firestore.collection('users').count().get();
       final postsCount = await _firestore.collection('posts').count().get();
       final clubsCount = await _firestore.collection('clubs').count().get();
-      final anonymousPostsCount = await _firestore.collection('anonymous_posts').count().get();
+      final anonymousPostsCount =
+          await _firestore.collection('anonymous_posts').count().get();
 
       return {
         'totalUsers': usersCount.count,
@@ -224,4 +232,85 @@ class AdminService {
       rethrow;
     }
   }
+
+  // Alias methods for admin dashboard compatibility
+
+  // Ban a user
+  Future<void> banUser(String userId) async {
+    await toggleBanUser(userId, true);
+  }
+
+  // Unban a user
+  Future<void> unbanUser(String userId) async {
+    await toggleBanUser(userId, false);
+  }
+
+  // Update user role
+  Future<void> updateUserRole(String userId, String role) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({'role': role});
+    } catch (e) {
+      _logger.e('Error updating user role: $e');
+      rethrow;
+    }
+  }
+
+  // Get reported content as a stream of maps
+  Stream<List<Map<String, dynamic>>> getReportedContent() {
+    return _firestore
+        .collection('posts')
+        .where('isReported', isEqualTo: true)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'type': 'post',
+          'content': data['content'] ?? '',
+          'userId': data['userId'] ?? '',
+          'userName': data['userName'] ?? 'Unknown',
+          'createdAt': data['createdAt'],
+          ...data,
+        };
+      }).toList();
+    });
+  }
+
+  // Delete reported content
+  Future<void> deleteContent(String id, String type) async {
+    try {
+      if (type == 'post') {
+        await removePost(id);
+      } else if (type == 'anonymous_post') {
+        await removeAnonymousPost(id);
+      }
+    } catch (e) {
+      _logger.e('Error deleting content: $e');
+      rethrow;
+    }
+  }
+
+  // Dismiss a report
+  Future<void> dismissReport(String id) async {
+    try {
+      // Try to dismiss as regular post first
+      final postDoc = await _firestore.collection('posts').doc(id).get();
+      if (postDoc.exists) {
+        await approvePost(id);
+      } else {
+        await approveAnonymousPost(id);
+      }
+    } catch (e) {
+      _logger.e('Error dismissing report: $e');
+      rethrow;
+    }
+  }
+
+  // Alias for getPendingClubs
+  Stream<List<Club>> getPendingClubApprovals() => getPendingClubs();
+
+  // Alias for getAnalytics
+  Future<Map<String, dynamic>> getAppStatistics() => getAnalytics();
 }

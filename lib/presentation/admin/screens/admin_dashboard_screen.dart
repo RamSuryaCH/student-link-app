@@ -17,7 +17,6 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final _adminService = getIt<AdminService>();
 
   @override
   void initState() {
@@ -313,7 +312,8 @@ class _ClubApprovalTab extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text(
                           'Category: ${club.category}',
-                          style: const TextStyle(color: AppColors.secondaryText),
+                          style:
+                              const TextStyle(color: AppColors.secondaryText),
                         ),
                         const SizedBox(height: 16),
                         Row(
@@ -382,7 +382,7 @@ class _StatisticsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final adminService = getIt<AdminService>();
 
-    return FutureBuilder(
+    return FutureBuilder<Map<String, dynamic>>(
       future: adminService.getAppStatistics(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

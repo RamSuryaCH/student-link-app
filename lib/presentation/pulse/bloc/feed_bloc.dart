@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:student_link_app/data/datasources/post_service.dart';
 import 'package:student_link_app/presentation/pulse/bloc/feed_event.dart';
 import 'package:student_link_app/presentation/pulse/bloc/feed_state.dart';
@@ -40,17 +41,36 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     }
   }
 
-  Future<void> _onRefreshFeed(RefreshFeedEvent event, Emitter<FeedState> emit) async {
+  Future<void> _onRefreshFeed(
+      RefreshFeedEvent event, Emitter<FeedState> emit) async {
     // Keep current state while refreshing
     add(const LoadFeedEvent());
   }
 
-  Future<void> _onCreatePost(CreatePostEvent event, Emitter<FeedState> emit) async {
+  Future<void> _onCreatePost(
+      CreatePostEvent event, Emitter<FeedState> emit) async {
     emit(const PostCreating());
     try {
+      final currentUserId = _postService.currentUserId;
+      if (currentUserId == null) {
+        emit(const FeedError('Not authenticated'));
+        return;
+      }
+
+      // Fetch user info for post
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
+          .get();
+      final userData = userDoc.data() ?? {};
+      final userName = userData['name'] ?? 'Unknown User';
+      final userPhotoUrl = userData['photoUrl'];
+
       await _postService.createPost(
+        userId: currentUserId,
+        userName: userName,
+        userPhotoUrl: userPhotoUrl,
         content: event.content,
-        imageUrl: event.imageUrl,
       );
       emit(const PostCreated());
       // Reload feed
@@ -68,10 +88,26 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     }
   }
 
-  Future<void> _onAddComment(AddCommentEvent event, Emitter<FeedState> emit) async {
+  Future<void> _onAddComment(
+      AddCommentEvent event, Emitter<FeedState> emit) async {
     try {
+      final currentUserId = _postService.currentUserId;
+      if (currentUserId == null) return;
+
+      // Fetch user info for comment
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
+          .get();
+      final userData = userDoc.data() ?? {};
+      final userName = userData['name'] ?? 'Unknown User';
+      final userPhotoUrl = userData['photoUrl'];
+
       await _postService.addComment(
         postId: event.postId,
+        userId: currentUserId,
+        userName: userName,
+        userPhotoUrl: userPhotoUrl,
         content: event.content,
       );
     } catch (e) {
@@ -79,7 +115,8 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     }
   }
 
-  Future<void> _onDeletePost(DeletePostEvent event, Emitter<FeedState> emit) async {
+  Future<void> _onDeletePost(
+      DeletePostEvent event, Emitter<FeedState> emit) async {
     try {
       await _postService.deletePost(event.postId);
     } catch (e) {

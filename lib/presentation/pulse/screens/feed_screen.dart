@@ -10,6 +10,7 @@ import 'package:student_link_app/presentation/pulse/bloc/feed_event.dart';
 import 'package:student_link_app/presentation/pulse/bloc/feed_state.dart';
 import 'package:student_link_app/domain/entities/post.dart';
 import 'package:student_link_app/data/datasources/post_service.dart';
+import 'package:student_link_app/data/datasources/firebase_auth_service.dart';
 import 'package:student_link_app/core/di/injection.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -78,12 +79,14 @@ class _FeedScreenContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                  const Icon(Icons.error_outline,
+                      size: 48, color: AppColors.error),
                   const SizedBox(height: 16),
                   Text(state.message),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => context.read<FeedBloc>().add(const LoadFeedEvent()),
+                    onPressed: () =>
+                        context.read<FeedBloc>().add(const LoadFeedEvent()),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -106,7 +109,8 @@ class _FeedScreenContent extends StatelessWidget {
               },
               child: ListView.builder(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: state.posts.length,
                 itemBuilder: (context, index) {
                   return MotionUtils.listLoadEffect(
@@ -161,7 +165,8 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await _imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
@@ -186,9 +191,9 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
     }
 
     context.read<FeedBloc>().add(CreatePostEvent(
-      content: _contentController.text.trim(),
-      imageUrl: imageUrl,
-    ));
+          content: _contentController.text.trim(),
+          imageUrl: imageUrl,
+        ));
 
     Navigator.pop(context);
   }
@@ -256,7 +261,8 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                           color: Colors.black54,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.close, color: Colors.white, size: 16),
+                        child: const Icon(Icons.close,
+                            color: Colors.white, size: 16),
                       ),
                     ),
                   ),
@@ -266,7 +272,8 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(CupertinoIcons.photo, color: AppColors.primary),
+                  icon: const Icon(CupertinoIcons.photo,
+                      color: AppColors.primary),
                   onPressed: _pickImage,
                 ),
                 const Spacer(),
@@ -274,7 +281,8 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                   onPressed: _isUploading ? null : _createPost,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
                   ),
                   child: _isUploading
                       ? const SizedBox(
@@ -303,7 +311,8 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasLiked = post.likes.contains(getIt<PostService>().currentUserId);
+    final currentUserId = getIt<FirebaseAuthService>().currentUser?.uid ?? '';
+    final hasLiked = post.likedBy.contains(currentUserId);
 
     return GlassContainer(
       margin: const EdgeInsets.only(bottom: 16),
@@ -314,10 +323,10 @@ class PostCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 backgroundColor: AppColors.primary,
-                backgroundImage: post.authorPhotoUrl != null
-                    ? CachedNetworkImageProvider(post.authorPhotoUrl!)
+                backgroundImage: post.userPhotoUrl != null
+                    ? CachedNetworkImageProvider(post.userPhotoUrl!)
                     : null,
-                child: post.authorPhotoUrl == null
+                child: post.userPhotoUrl == null
                     ? const Icon(Icons.person, color: Colors.white)
                     : null,
               ),
@@ -327,7 +336,7 @@ class PostCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      post.authorName,
+                      post.userName,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -343,7 +352,8 @@ class PostCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.more_horiz, color: AppColors.secondaryText),
+                icon: const Icon(Icons.more_horiz,
+                    color: AppColors.secondaryText),
                 onPressed: () => _showPostOptions(context),
               ),
             ],
@@ -353,12 +363,12 @@ class PostCard extends StatelessWidget {
             post.content,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          if (post.imageUrl != null) ...[
+          if (post.imageUrls.isNotEmpty) ...[
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: CachedNetworkImage(
-                imageUrl: post.imageUrl!,
+                imageUrl: post.imageUrls.first,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: 200,
@@ -383,14 +393,15 @@ class PostCard extends StatelessWidget {
             children: [
               _buildInteractionButton(
                 hasLiked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
-                post.likes.length.toString(),
+                post.likesCount.toString(),
                 context,
                 hasLiked ? AppColors.error : AppColors.secondaryText,
-                onTap: () => context.read<FeedBloc>().add(LikePostEvent(post.id)),
+                onTap: () =>
+                    context.read<FeedBloc>().add(LikePostEvent(post.id)),
               ),
               _buildInteractionButton(
                 CupertinoIcons.chat_bubble,
-                post.commentCount.toString(),
+                post.commentsCount.toString(),
                 context,
                 AppColors.secondaryText,
                 onTap: () => _showCommentsSheet(context),
@@ -456,7 +467,7 @@ class PostCard extends StatelessWidget {
 
   void _showCommentsSheet(BuildContext context) {
     final commentController = TextEditingController();
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -489,11 +500,11 @@ class PostCard extends StatelessWidget {
               ),
               const Divider(height: 1),
               Expanded(
-                child: post.commentCount == 0
+                child: post.commentsCount == 0
                     ? const Center(child: Text('No comments yet'))
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: post.commentCount,
+                        itemCount: post.commentsCount,
                         itemBuilder: (context, index) {
                           return const ListTile(
                             title: Text('Sample comment'),

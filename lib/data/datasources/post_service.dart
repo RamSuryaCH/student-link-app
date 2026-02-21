@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 import '../../domain/entities/post.dart';
 import '../../domain/entities/comment.dart';
@@ -8,7 +9,11 @@ import 'dart:io';
 class PostService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final Logger _logger = Logger();
+
+  // Get current user ID
+  String? get currentUserId => _auth.currentUser?.uid;
 
   // Create a new post
   Future<Post> createPost({
@@ -24,7 +29,9 @@ class PostService {
       // Upload images if any
       if (images != null && images.isNotEmpty) {
         for (int i = 0; i < images.length; i++) {
-          final ref = _storage.ref().child('posts/${DateTime.now().millisecondsSinceEpoch}_$i.jpg');
+          final ref = _storage
+              .ref()
+              .child('posts/${DateTime.now().millisecondsSinceEpoch}_$i.jpg');
           await ref.putFile(images[i]);
           final url = await ref.getDownloadURL();
           imageUrls.add(url);
@@ -51,7 +58,8 @@ class PostService {
   }
 
   // Get posts feed (with pagination)
-  Stream<List<Post>> getPostsFeed({int limit = 20, DocumentSnapshot? lastDocument}) {
+  Stream<List<Post>> getPostsFeed(
+      {int limit = 20, DocumentSnapshot? lastDocument}) {
     try {
       Query query = _firestore
           .collection('posts')
@@ -64,7 +72,9 @@ class PostService {
       }
 
       return query.snapshots().map((snapshot) {
-        return snapshot.docs.map((doc) => Post.fromMap(doc.data() as Map<String, dynamic>)).toList();
+        return snapshot.docs
+            .map((doc) => Post.fromMap(doc.data() as Map<String, dynamic>))
+            .toList();
       });
     } catch (e) {
       _logger.e('Error getting posts feed: $e');
@@ -72,14 +82,24 @@ class PostService {
     }
   }
 
+  // Alias for compatibility with BLoC
+  Stream<List<Post>> getFeedPosts() => getPostsFeed();
+
+  // Like post (using current user)
+  Future<void> likePost(String postId) async {
+    final userId = currentUserId;
+    if (userId == null) return;
+    await toggleLike(postId, userId);
+  }
+
   // Like/Unlike post
   Future<void> toggleLike(String postId, String userId) async {
     try {
       final postRef = _firestore.collection('posts').doc(postId);
       final postDoc = await postRef.get();
-      
+
       if (!postDoc.exists) return;
-      
+
       final post = Post.fromMap(postDoc.data()!);
       final likedBy = List<String>.from(post.likedBy);
 
@@ -111,7 +131,11 @@ class PostService {
     required String content,
   }) async {
     try {
-      final commentRef = _firestore.collection('posts').doc(postId).collection('comments').doc();
+      final commentRef = _firestore
+          .collection('posts')
+          .doc(postId)
+          .collection('comments')
+          .doc();
       final comment = Comment(
         id: commentRef.id,
         postId: postId,

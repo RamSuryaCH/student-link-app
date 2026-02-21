@@ -37,6 +37,9 @@ class UserEntity extends Equatable {
     this.fcmToken,
   });
 
+  // Alias for photoUrl -> profilePhotoUrl for compatibility
+  String? get photoUrl => profilePhotoUrl;
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

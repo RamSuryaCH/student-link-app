@@ -49,7 +49,8 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
     emit(const MessagesLoading());
     try {
       await _messagesSubscription?.cancel();
-      _messagesSubscription = _messagingService.getMessages(event.chatRoomId).listen(
+      _messagesSubscription =
+          _messagingService.getMessages(event.chatRoomId).listen(
         (messages) {
           if (!isClosed) {
             emit(MessagesLoaded(messages));
@@ -71,10 +72,24 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
     Emitter<MessagingState> emit,
   ) async {
     try {
+      final currentUserId = _messagingService.currentUserId;
+      if (currentUserId == null) return;
+
+      // Get receiver ID from chat room participants
+      final chatRoomId = event.chatRoomId;
+      final parts = chatRoomId.split('_');
+      final receiverId = parts.firstWhere(
+        (id) => id != currentUserId,
+        orElse: () => '',
+      );
+
+      if (receiverId.isEmpty) return;
+
       await _messagingService.sendMessage(
-        chatRoomId: event.chatRoomId,
+        chatId: event.chatRoomId,
+        senderId: currentUserId,
+        receiverId: receiverId,
         content: event.content,
-        imageUrl: event.imageUrl,
       );
     } catch (e) {
       emit(MessagingError(e.toString()));

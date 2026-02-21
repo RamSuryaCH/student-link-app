@@ -18,13 +18,14 @@ class ConnectScreen extends StatefulWidget {
   State<ConnectScreen> createState() => _ConnectScreenState();
 }
 
-class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProviderStateMixin {
+class _ConnectScreenState extends State<ConnectScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final connectionService = GetIt.I<ConnectionService>();
   final userProfileService = GetIt.I<UserProfileService>();
   final authService = GetIt.I<FirebaseAuthService>();
   final TextEditingController _searchController = TextEditingController();
-  
+
   List<UserEntity> searchResults = [];
   bool isSearching = false;
 
@@ -51,11 +52,12 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
     }
 
     setState(() => isSearching = true);
-    
+
     try {
-      final currentUser = authService.userChanges.value;
+      final currentUser = authService.currentUser;
       if (currentUser != null) {
-        final results = await connectionService.searchUsers(query, currentUser.uid);
+        final results =
+            await connectionService.searchUsers(query, currentUser.uid);
         setState(() {
           searchResults = results;
           isSearching = false;
@@ -92,7 +94,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search students...',
-                prefixIcon: const Icon(CupertinoIcons.search, color: AppColors.primary),
+                prefixIcon:
+                    const Icon(CupertinoIcons.search, color: AppColors.primary),
                 filled: true,
                 fillColor: AppColors.surface.withOpacity(0.5),
                 border: OutlineInputBorder(
@@ -139,20 +142,24 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
       padding: const EdgeInsets.all(16),
       itemCount: searchResults.length,
       itemBuilder: (context, index) {
-        return _buildUserCard(searchResults[index]).animate().fadeIn(delay: (index * 50).ms);
+        return _buildUserCard(searchResults[index])
+            .animate()
+            .fadeIn(delay: (index * 50).ms);
       },
     );
   }
 
+  Future<List<UserEntity>> _getSuggestedConnections() async {
+    final currentUser = authService.currentUser;
+    if (currentUser != null) {
+      return await connectionService.getSuggestedConnections(currentUser.uid);
+    }
+    return <UserEntity>[];
+  }
+
   Widget _buildDiscoverTab() {
     return FutureBuilder<List<UserEntity>>(
-      future: () async {
-        final currentUser = authService.userChanges.value;
-        if (currentUser != null) {
-          return await connectionService.getSuggestedConnections(currentUser.uid);
-        }
-        return [];
-      }(),
+      future: _getSuggestedConnections(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -163,7 +170,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.person_2, size: 64, color: AppColors.secondaryText),
+                const Icon(CupertinoIcons.person_2,
+                    size: 64, color: AppColors.secondaryText),
                 const SizedBox(height: 16),
                 Text(
                   'No suggestions at the moment',
@@ -178,7 +186,9 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
           padding: const EdgeInsets.all(16),
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
-            return _buildUserCard(snapshot.data![index]).animate().fadeIn(delay: (index * 50).ms);
+            return _buildUserCard(snapshot.data![index])
+                .animate()
+                .fadeIn(delay: (index * 50).ms);
           },
         );
       },
@@ -186,7 +196,7 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
   }
 
   Widget _buildRequestsTab() {
-    final currentUser = authService.userChanges.value;
+    final currentUser = authService.currentUser;
     if (currentUser == null) {
       return const Center(child: Text('Please login'));
     }
@@ -203,7 +213,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.bell, size: 64, color: AppColors.secondaryText),
+                const Icon(CupertinoIcons.bell,
+                    size: 64, color: AppColors.secondaryText),
                 const SizedBox(height: 16),
                 Text(
                   'No connection requests',
@@ -218,7 +229,9 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
           padding: const EdgeInsets.all(16),
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
-            return _buildRequestCard(snapshot.data![index]).animate().fadeIn(delay: (index * 50).ms);
+            return _buildRequestCard(snapshot.data![index])
+                .animate()
+                .fadeIn(delay: (index * 50).ms);
           },
         );
       },
@@ -226,7 +239,7 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
   }
 
   Widget _buildConnectionsTab() {
-    final currentUser = authService.userChanges.value;
+    final currentUser = authService.currentUser;
     if (currentUser == null) {
       return const Center(child: Text('Please login'));
     }
@@ -243,7 +256,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.person_2_fill, size: 64, color: AppColors.secondaryText),
+                const Icon(CupertinoIcons.person_2_fill,
+                    size: 64, color: AppColors.secondaryText),
                 const SizedBox(height: 16),
                 Text(
                   'No connections yet',
@@ -258,7 +272,9 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
           padding: const EdgeInsets.all(16),
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
-            return _buildConnectionCard(snapshot.data![index]).animate().fadeIn(delay: (index * 50).ms);
+            return _buildConnectionCard(snapshot.data![index])
+                .animate()
+                .fadeIn(delay: (index * 50).ms);
           },
         );
       },
@@ -281,7 +297,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
             child: user.profilePhotoUrl == null
                 ? Text(
                     user.name[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   )
                 : null,
           ),
@@ -293,8 +310,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
                 Text(
                   user.name,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(
                   user.department,
@@ -303,7 +320,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
                 if (user.isAlumni)
                   Container(
                     margin: const EdgeInsets.only(top: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.accent.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
@@ -324,7 +342,7 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
             ),
             child: ElevatedButton(
               onPressed: () async {
-                final currentUser = authService.userChanges.value;
+                final currentUser = authService.currentUser;
                 if (currentUser != null) {
                   try {
                     await connectionService.sendConnectionRequest(
@@ -350,7 +368,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
               child: const Text('Connect'),
             ),
@@ -384,7 +403,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
                 child: user.profilePhotoUrl == null
                     ? Text(
                         user.name[0].toUpperCase(),
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       )
                     : null,
               ),
@@ -396,8 +416,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
                     Text(
                       user.name,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       user.department,
@@ -410,7 +430,7 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
                 children: [
                   IconButton(
                     onPressed: () async {
-                      final currentUser = authService.userChanges.value;
+                      final currentUser = authService.currentUser;
                       if (currentUser != null) {
                         await connectionService.acceptConnectionRequest(
                           request.id,
@@ -425,11 +445,13 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
                         );
                       }
                     },
-                    icon: const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.success),
+                    icon: const Icon(CupertinoIcons.checkmark_circle_fill,
+                        color: AppColors.success),
                   ),
                   IconButton(
                     onPressed: () async {
-                      await connectionService.rejectConnectionRequest(request.id);
+                      await connectionService
+                          .rejectConnectionRequest(request.id);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Connection request rejected'),
@@ -437,7 +459,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
                         ),
                       );
                     },
-                    icon: const Icon(CupertinoIcons.xmark_circle_fill, color: AppColors.error),
+                    icon: const Icon(CupertinoIcons.xmark_circle_fill,
+                        color: AppColors.error),
                   ),
                 ],
               ),
@@ -464,7 +487,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
             child: user.profilePhotoUrl == null
                 ? Text(
                     user.name[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   )
                 : null,
           ),
@@ -476,8 +500,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
                 Text(
                   user.name,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(
                   user.department,
@@ -491,7 +515,8 @@ class _ConnectScreenState extends State<ConnectScreen> with SingleTickerProvider
               // Navigate to chat
               // Navigator.push(context, MaterialPageRoute(builder: (_) => ChatScreen(colleagueName: user.name)));
             },
-            icon: const Icon(CupertinoIcons.chat_bubble_fill, color: AppColors.primary),
+            icon: const Icon(CupertinoIcons.chat_bubble_fill,
+                color: AppColors.primary),
           ),
         ],
       ),

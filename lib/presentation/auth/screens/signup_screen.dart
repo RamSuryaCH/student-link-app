@@ -41,7 +41,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       final authService = GetIt.I<FirebaseAuthService>();
-      
+
       // Check if email ends with .edu
       if (!_emailController.text.toLowerCase().endsWith('.edu')) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -139,23 +139,21 @@ class _SignupScreenState extends State<SignupScreen> {
                       Text(
                         "Join Student Link",
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 32),
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayLarge
+                            ?.copyWith(fontSize: 32),
                       ).animate().fade(duration: 500.ms).slideY(begin: -0.2),
-                      
                       const SizedBox(height: 8),
-                      
                       Text(
                         "Connect with your campus community",
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.primaryText.withOpacity(0.7),
-                        ),
+                              color: AppColors.primaryText.withOpacity(0.7),
+                            ),
                       ).animate().fade(delay: 200.ms).slideY(begin: -0.2),
-
                       const SizedBox(height: 32),
-
                       GlassContainer(
-                        height: null,
                         child: Column(
                           children: [
                             // Name field
@@ -164,7 +162,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 hintText: 'Full Name',
-                                prefixIcon: const Icon(CupertinoIcons.person, color: AppColors.primary),
+                                prefixIcon: const Icon(CupertinoIcons.person,
+                                    color: AppColors.primary),
                                 filled: true,
                                 fillColor: AppColors.surface.withOpacity(0.5),
                                 border: OutlineInputBorder(
@@ -179,7 +178,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 return null;
                               },
                             ),
-                            
+
                             const SizedBox(height: 16),
 
                             // Email field
@@ -189,7 +188,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 hintText: 'Student Email (.edu)',
-                                prefixIcon: const Icon(CupertinoIcons.mail, color: AppColors.primary),
+                                prefixIcon: const Icon(CupertinoIcons.mail,
+                                    color: AppColors.primary),
                                 filled: true,
                                 fillColor: AppColors.surface.withOpacity(0.5),
                                 border: OutlineInputBorder(
@@ -216,7 +216,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 hintText: 'Department (e.g., Computer Science)',
-                                prefixIcon: const Icon(CupertinoIcons.building_2_fill, color: AppColors.primary),
+                                prefixIcon: const Icon(
+                                    CupertinoIcons.building_2_fill,
+                                    color: AppColors.primary),
                                 filled: true,
                                 fillColor: AppColors.surface.withOpacity(0.5),
                                 border: OutlineInputBorder(
@@ -241,14 +243,18 @@ class _SignupScreenState extends State<SignupScreen> {
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 hintText: 'Password',
-                                prefixIcon: const Icon(CupertinoIcons.lock, color: AppColors.primary),
+                                prefixIcon: const Icon(CupertinoIcons.lock,
+                                    color: AppColors.primary),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscurePassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                                    _obscurePassword
+                                        ? CupertinoIcons.eye_slash
+                                        : CupertinoIcons.eye,
                                     color: AppColors.secondaryText,
                                   ),
                                   onPressed: () {
-                                    setState(() => _obscurePassword = !_obscurePassword);
+                                    setState(() =>
+                                        _obscurePassword = !_obscurePassword);
                                   },
                                 ),
                                 filled: true,
@@ -278,14 +284,18 @@ class _SignupScreenState extends State<SignupScreen> {
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 hintText: 'Confirm Password',
-                                prefixIcon: const Icon(CupertinoIcons.lock_fill, color: AppColors.primary),
+                                prefixIcon: const Icon(CupertinoIcons.lock_fill,
+                                    color: AppColors.primary),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscureConfirmPassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                                    _obscureConfirmPassword
+                                        ? CupertinoIcons.eye_slash
+                                        : CupertinoIcons.eye,
                                     color: AppColors.secondaryText,
                                   ),
                                   onPressed: () {
-                                    setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                                    setState(() => _obscureConfirmPassword =
+                                        !_obscureConfirmPassword);
                                   },
                                 ),
                                 filled: true,
@@ -343,18 +353,22 @@ class _SignupScreenState extends State<SignupScreen> {
                                       )
                                     : Text(
                                         "SIGN UP",
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                               ),
                             ),
                           ],
                         ),
-                      ).animate().fade(delay: 400.ms, duration: 400.ms).scaleXY(begin: 0.9, end: 1),
-
+                      )
+                          .animate()
+                          .fade(delay: 400.ms, duration: 400.ms)
+                          .scaleXY(begin: 0.9, end: 1),
                       const SizedBox(height: 24),
-
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);

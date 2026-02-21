@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 import '../../domain/entities/message.dart';
 import '../../domain/entities/chat_room.dart';
@@ -8,7 +9,20 @@ import 'dart:io';
 class MessagingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final Logger _logger = Logger();
+
+  // Get current user ID
+  String? get currentUserId => _auth.currentUser?.uid;
+
+  // Get chat rooms for current user
+  Stream<List<ChatRoom>> getChatRooms() {
+    final userId = currentUserId;
+    if (userId == null) {
+      return Stream.value([]);
+    }
+    return getUserChatRooms(userId);
+  }
 
   // Get or create chat room between two users
   Future<String> getOrCreateChatRoom(String userId1, String userId2) async {
@@ -50,7 +64,8 @@ class MessagingService {
 
       // Upload media if provided
       if (mediaFile != null && type == MessageType.image) {
-        final ref = _storage.ref().child('chats/$chatId/${DateTime.now().millisecondsSinceEpoch}.jpg');
+        final ref = _storage.ref().child(
+            'chats/$chatId/${DateTime.now().millisecondsSinceEpoch}.jpg');
         await ref.putFile(mediaFile);
         mediaUrl = await ref.getDownloadURL();
       }
@@ -109,14 +124,17 @@ class MessagingService {
   }
 
   // Mark messages as read
-  Future<void> markMessagesAsRead(String chatId, String userId) async {
+  Future<void> markMessagesAsRead(String chatId, [String? userId]) async {
+    final actualUserId = userId ?? currentUserId;
+    if (actualUserId == null) return;
+
     try {
       // Update all unread messages
       final unreadMessages = await _firestore
           .collection('chat_rooms')
           .doc(chatId)
           .collection('messages')
-          .where('receiverId', isEqualTo: userId)
+          .where('receiverId', isEqualTo: actualUserId)
           .where('isRead', isEqualTo: false)
           .get();
 
@@ -126,7 +144,7 @@ class MessagingService {
 
       // Reset unread count
       await _firestore.collection('chat_rooms').doc(chatId).update({
-        'unreadCounts.$userId': 0,
+        'unreadCounts.$actualUserId': 0,
       });
     } catch (e) {
       _logger.e('Error marking messages as read: $e');
@@ -134,7 +152,7 @@ class MessagingService {
     }
   }
 
-  // Get user's chat rooms
+  // Get user's chat rooms with user info populated
   Stream<List<ChatRoom>> getUserChatRooms(String userId) {
     try {
       return _firestore
@@ -142,8 +160,34 @@ class MessagingService {
           .where('participantIds', arrayContains: userId)
           .orderBy('lastMessageTime', descending: true)
           .snapshots()
-          .map((snapshot) {
-        return snapshot.docs.map((doc) => ChatRoom.fromMap(doc.data())).toList();
+          .asyncMap((snapshot) async {
+        List<ChatRoom> chatRooms = [];
+        for (var doc in snapshot.docs) {
+          var chatRoom = ChatRoom.fromMap(doc.data());
+          // Get the other user's info
+          final otherUserId = chatRoom.participantIds.firstWhere(
+            (id) => id != userId,
+            orElse: () => '',
+          );
+          if (otherUserId.isNotEmpty) {
+            try {
+              final userDoc =
+                  await _firestore.collection('users').doc(otherUserId).get();
+              if (userDoc.exists) {
+                final userData = userDoc.data()!;
+                chatRoom = chatRoom.copyWith(
+                  otherUserId: otherUserId,
+                  otherUserName: userData['name'] ?? 'Unknown User',
+                  otherUserPhotoUrl: userData['photoUrl'],
+                );
+              }
+            } catch (e) {
+              _logger.w('Could not fetch user info: $e');
+            }
+          }
+          chatRooms.add(chatRoom);
+        }
+        return chatRooms;
       });
     } catch (e) {
       _logger.e('Error getting user chat rooms: $e');
@@ -152,7 +196,8 @@ class MessagingService {
   }
 
   // Delete message (sender only within 5 minutes)
-  Future<void> deleteMessage(String chatId, String messageId, DateTime messageTime) async {
+  Future<void> deleteMessage(
+      String chatId, String messageId, DateTime messageTime) async {
     try {
       final now = DateTime.now();
       final difference = now.difference(messageTime);

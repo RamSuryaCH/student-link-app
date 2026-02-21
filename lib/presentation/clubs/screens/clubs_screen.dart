@@ -16,7 +16,8 @@ class ClubsScreen extends StatefulWidget {
   State<ClubsScreen> createState() => _ClubsScreenState();
 }
 
-class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStateMixin {
+class _ClubsScreenState extends State<ClubsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final clubService = GetIt.I<ClubService>();
   final authService = GetIt.I<FirebaseAuthService>();
@@ -60,13 +61,14 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
                   Text(
                     'Create New Club',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(CupertinoIcons.xmark_circle, color: AppColors.secondaryText),
+                    icon: const Icon(CupertinoIcons.xmark_circle,
+                        color: AppColors.secondaryText),
                   ),
                 ],
               ),
@@ -123,12 +125,16 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
                 ),
                 child: Row(
                   children: [
-                    const Icon(CupertinoIcons.info_circle, color: AppColors.warning, size: 20),
+                    const Icon(CupertinoIcons.info_circle,
+                        color: AppColors.warning, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Club will require admin approval before going live',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(fontSize: 12),
                       ),
                     ),
                   ],
@@ -154,7 +160,7 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
                       return;
                     }
 
-                    final currentUser = authService.userChanges.value;
+                    final currentUser = authService.currentUser;
                     if (currentUser != null) {
                       try {
                         await clubService.createClub(
@@ -166,7 +172,8 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Club created! Pending admin approval'),
+                            content:
+                                Text('Club created! Pending admin approval'),
                             backgroundColor: AppColors.success,
                           ),
                         );
@@ -240,7 +247,8 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.building_2_fill, size: 64, color: AppColors.secondaryText),
+                const Icon(CupertinoIcons.building_2_fill,
+                    size: 64, color: AppColors.secondaryText),
                 const SizedBox(height: 16),
                 Text(
                   'No clubs available yet',
@@ -262,7 +270,9 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
             final club = snapshot.data![index];
-            return _buildClubCard(club).animate().fadeIn(delay: (index * 50).ms);
+            return _buildClubCard(club)
+                .animate()
+                .fadeIn(delay: (index * 50).ms);
           },
         );
       },
@@ -270,7 +280,7 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
   }
 
   Widget _buildMyClubsTab() {
-    final currentUser = authService.userChanges.value;
+    final currentUser = authService.currentUser;
     if (currentUser == null) {
       return const Center(child: Text('Please login'));
     }
@@ -287,7 +297,8 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.person_3_fill, size: 64, color: AppColors.secondaryText),
+                const Icon(CupertinoIcons.person_3_fill,
+                    size: 64, color: AppColors.secondaryText),
                 const SizedBox(height: 16),
                 Text(
                   "You haven't joined any clubs yet",
@@ -309,7 +320,9 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
             final club = snapshot.data![index];
-            return _buildClubCard(club).animate().fadeIn(delay: (index * 50).ms);
+            return _buildClubCard(club)
+                .animate()
+                .fadeIn(delay: (index * 50).ms);
           },
         );
       },
@@ -317,13 +330,14 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
   }
 
   Widget _buildClubCard(Club club) {
-    final currentUser = authService.userChanges.value;
-    final isMember = currentUser != null && club.memberIds.contains(currentUser.uid);
-    final isPending = currentUser != null && club.pendingMemberIds.contains(currentUser.uid);
+    final currentUser = authService.currentUser;
+    final isMember =
+        currentUser != null && club.memberIds.contains(currentUser.uid);
+    final isPending =
+        currentUser != null && club.pendingMemberIds.contains(currentUser.uid);
 
     return GlassContainer(
       padding: const EdgeInsets.all(12),
-      height: null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -360,8 +374,8 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
           Text(
             club.name,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -387,11 +401,15 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
           // Member count
           Row(
             children: [
-              const Icon(CupertinoIcons.person_2_fill, size: 14, color: AppColors.secondaryText),
+              const Icon(CupertinoIcons.person_2_fill,
+                  size: 14, color: AppColors.secondaryText),
               const SizedBox(width: 4),
               Text(
                 '${club.memberIds.length} members',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontSize: 12),
               ),
             ],
           ),
@@ -405,7 +423,8 @@ class _ClubsScreenState extends State<ClubsScreen> with SingleTickerProviderStat
                   ? null
                   : () async {
                       if (currentUser != null) {
-                        await clubService.requestToJoinClub(club.id, currentUser.uid);
+                        await clubService.requestToJoinClub(
+                            club.id, currentUser.uid);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Join request sent!'),

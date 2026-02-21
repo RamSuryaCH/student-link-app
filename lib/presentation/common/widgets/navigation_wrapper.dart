@@ -35,16 +35,14 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
         children: _screens,
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.1),
-              blurRadius: 20,
-              spreadRadius: -5,
-              offset: const Offset(0, -5),
-            )
-          ]
-        ),
+        decoration: BoxDecoration(boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.1),
+            blurRadius: 20,
+            spreadRadius: -5,
+            offset: const Offset(0, -5),
+          )
+        ]),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
@@ -55,8 +53,8 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home),
-              activeIcon: Icon(CupertinoIcons.home_fill),
+              icon: Icon(CupertinoIcons.house),
+              activeIcon: Icon(CupertinoIcons.house_fill),
               label: 'Pulse',
             ),
             BottomNavigationBarItem(

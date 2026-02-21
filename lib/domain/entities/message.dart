@@ -29,6 +29,12 @@ class Message extends Equatable {
     this.mediaUrl,
   });
 
+  // Alias for imageUrl -> mediaUrl for UI compatibility
+  String? get imageUrl => mediaUrl;
+
+  // Alias for timestamp -> createdAt for UI compatibility
+  DateTime get timestamp => createdAt;
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

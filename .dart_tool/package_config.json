@@ -387,7 +387,7 @@
     },
     {
       "name": "flutter_local_notifications",
-      "rootUri": "file:///home/codespace/.pub-cache/hosted/pub.dev/flutter_local_notifications-16.3.3",
+      "rootUri": "file:///home/codespace/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -1082,7 +1082,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2026-02-21T06:02:23.157845Z",
+  "generated": "2026-02-21T07:36:57.239488Z",
   "generator": "pub",
   "generatorVersion": "3.5.4",
   "flutterRoot": "file:///usr/local/flutter",

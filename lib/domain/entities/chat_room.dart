@@ -8,6 +8,10 @@ class ChatRoom extends Equatable {
   final String? lastMessageSenderId;
   final Map<String, int> unreadCounts; // userId -> unreadCount
   final DateTime createdAt;
+  // UI helper fields - populated by service
+  final String? otherUserName;
+  final String? otherUserPhotoUrl;
+  final String? otherUserId;
 
   const ChatRoom({
     required this.id,
@@ -17,7 +21,19 @@ class ChatRoom extends Equatable {
     this.lastMessageSenderId,
     this.unreadCounts = const {},
     required this.createdAt,
+    this.otherUserName,
+    this.otherUserPhotoUrl,
+    this.otherUserId,
   });
+
+  // Helper to get unread count for a specific user
+  int getUnreadCount(String userId) => unreadCounts[userId] ?? 0;
+
+  // Alias for UI that expects unreadCount property
+  int get unreadCount {
+    // Returns total unread if no specific user context
+    return unreadCounts.values.fold(0, (sum, count) => sum + count);
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -28,6 +44,9 @@ class ChatRoom extends Equatable {
       'lastMessageSenderId': lastMessageSenderId,
       'unreadCounts': unreadCounts,
       'createdAt': createdAt.toIso8601String(),
+      'otherUserName': otherUserName,
+      'otherUserPhotoUrl': otherUserPhotoUrl,
+      'otherUserId': otherUserId,
     };
   }
 
@@ -41,7 +60,12 @@ class ChatRoom extends Equatable {
           : null,
       lastMessageSenderId: map['lastMessageSenderId'],
       unreadCounts: Map<String, int>.from(map['unreadCounts'] ?? {}),
-      createdAt: DateTime.parse(map['createdAt']),
+      createdAt: map['createdAt'] != null
+          ? DateTime.parse(map['createdAt'])
+          : DateTime.now(),
+      otherUserName: map['otherUserName'],
+      otherUserPhotoUrl: map['otherUserPhotoUrl'],
+      otherUserId: map['otherUserId'],
     );
   }
 
@@ -53,6 +77,9 @@ class ChatRoom extends Equatable {
     String? lastMessageSenderId,
     Map<String, int>? unreadCounts,
     DateTime? createdAt,
+    String? otherUserName,
+    String? otherUserPhotoUrl,
+    String? otherUserId,
   }) {
     return ChatRoom(
       id: id ?? this.id,
@@ -62,6 +89,9 @@ class ChatRoom extends Equatable {
       lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
       unreadCounts: unreadCounts ?? this.unreadCounts,
       createdAt: createdAt ?? this.createdAt,
+      otherUserName: otherUserName ?? this.otherUserName,
+      otherUserPhotoUrl: otherUserPhotoUrl ?? this.otherUserPhotoUrl,
+      otherUserId: otherUserId ?? this.otherUserId,
     );
   }
 
@@ -74,5 +104,8 @@ class ChatRoom extends Equatable {
         lastMessageSenderId,
         unreadCounts,
         createdAt,
+        otherUserName,
+        otherUserPhotoUrl,
+        otherUserId,
       ];
 }

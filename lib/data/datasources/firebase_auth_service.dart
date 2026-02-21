@@ -3,21 +3,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/user.dart';
 
 class FirebaseAuthService {
-  final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  final firebase_auth.FirebaseAuth _firebaseAuth =
+      firebase_auth.FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Stream of auth changes
-  Stream<firebase_auth.User?> get userChanges => _firebaseAuth.authStateChanges();
+  Stream<firebase_auth.User?> get userChanges =>
+      _firebaseAuth.authStateChanges();
+
+  // Get current user
+  firebase_auth.User? get currentUser => _firebaseAuth.currentUser;
 
   Future<UserEntity?> signInWithEmail(String email, String password) async {
     try {
       final credential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email, 
-        password: password
-      );
+          email: email, password: password);
       if (credential.user != null) {
         // Fetch custom user profile from Firestore
-        final doc = await _firestore.collection('users').doc(credential.user!.uid).get();
+        final doc = await _firestore
+            .collection('users')
+            .doc(credential.user!.uid)
+            .get();
         if (doc.exists) {
           return UserEntity.fromMap(doc.data()!);
         }
@@ -37,10 +43,8 @@ class FirebaseAuthService {
   }) async {
     try {
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email, 
-        password: password
-      );
-      
+          email: email, password: password);
+
       final newUser = UserEntity(
         id: credential.user!.uid,
         name: name,

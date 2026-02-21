@@ -54,7 +54,7 @@ dependencies:
   google_generative_ai: ^0.2.1
   
   # Notifications & Permissions
-  flutter_local_notifications: ^16.3.0
+  flutter_local_notifications: ^17.2.3
   permission_handler: ^11.1.0
 
 dev_dependencies:

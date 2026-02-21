@@ -50,13 +50,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     'Edit Profile',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(CupertinoIcons.xmark_circle, color: AppColors.secondaryText),
+                    icon: const Icon(CupertinoIcons.xmark_circle,
+                        color: AppColors.secondaryText),
                   ),
                 ],
               ),
@@ -169,8 +170,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = authService.userChanges.value;
-    
+    final currentUser = authService.currentUser;
+
     if (currentUser == null) {
       return const Scaffold(
         body: Center(child: Text('Please login')),
@@ -232,13 +233,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.primary, width: 3),
+                            border:
+                                Border.all(color: AppColors.primary, width: 3),
                           ),
                           child: CircleAvatar(
                             radius: 50,
                             backgroundColor: AppColors.primary,
                             backgroundImage: user.profilePhotoUrl != null
-                                ? CachedNetworkImageProvider(user.profilePhotoUrl!)
+                                ? CachedNetworkImageProvider(
+                                    user.profilePhotoUrl!)
                                 : null,
                             child: user.profilePhotoUrl == null
                                 ? Text(
@@ -282,9 +285,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               children: [
                                 Text(
                                   user.name,
-                                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                    fontSize: 28,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displayLarge
+                                      ?.copyWith(
+                                        fontSize: 28,
+                                      ),
                                 ).animate().fadeIn(),
                                 const SizedBox(height: 4),
                                 Row(
@@ -298,7 +304,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ),
                                         decoration: BoxDecoration(
                                           gradient: AppColors.primaryGradient,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         child: const Text(
                                           'Alumni',
@@ -316,7 +323,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ),
                                         decoration: BoxDecoration(
                                           color: AppColors.warning,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         child: const Text(
                                           'Admin',
@@ -398,10 +406,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (user.bio != null && user.bio!.isNotEmpty) ...[
                         Text(
                           'About',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         GlassContainer(
@@ -419,9 +428,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         'Information',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       GlassContainer(
@@ -435,14 +444,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               user.department,
                             ),
                             if (user.yearOfStudy != null) ...[
-                              const Divider(color: AppColors.secondaryText, height: 24),
+                              const Divider(
+                                  color: AppColors.secondaryText, height: 24),
                               _buildInfoRow(
                                 CupertinoIcons.calendar,
                                 'Year of Study',
                                 user.yearOfStudy!,
                               ),
                             ],
-                            const Divider(color: AppColors.secondaryText, height: 24),
+                            const Divider(
+                                color: AppColors.secondaryText, height: 24),
                             _buildInfoRow(
                               CupertinoIcons.mail,
                               'Email',
@@ -458,10 +469,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (user.interests.isNotEmpty) ...[
                         Text(
                           'Interests',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         Wrap(
@@ -505,17 +517,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Text(
           value,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontSize: 12,
-          ),
+                fontSize: 12,
+              ),
         ),
       ],
     );
@@ -569,34 +581,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 if (isAdmin) ...[
                   ListTile(
-                    leading: const Icon(CupertinoIcons.shield_lefthalf_fill, color: AppColors.warning),
+                    leading: const Icon(CupertinoIcons.shield_lefthalf_fill,
+                        color: AppColors.warning),
                     title: const Text('Admin Dashboard'),
-                    trailing: const Icon(CupertinoIcons.chevron_right, size: 16),
+                    trailing:
+                        const Icon(CupertinoIcons.chevron_right, size: 16),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => const AdminDashboardScreen()),
                       );
                     },
                   ),
                   const Divider(color: AppColors.secondaryText, height: 1),
                 ],
                 ListTile(
-                  leading: const Icon(CupertinoIcons.eye_slash, color: AppColors.accent),
+                  leading: const Icon(CupertinoIcons.eye_slash,
+                      color: AppColors.accent),
                   title: const Text('Anonymous Space'),
                   trailing: const Icon(CupertinoIcons.chevron_right, size: 16),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AnonySpaceScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const AnonySpaceScreen()),
                     );
                   },
                 ),
                 const Divider(color: AppColors.secondaryText, height: 1),
                 ListTile(
-                  leading: const Icon(CupertinoIcons.settings, color: AppColors.primary),
+                  leading: const Icon(CupertinoIcons.settings,
+                      color: AppColors.primary),
                   title: const Text('Settings'),
                   trailing: const Icon(CupertinoIcons.chevron_right, size: 16),
                   onTap: () {
@@ -605,7 +623,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const Divider(color: AppColors.secondaryText, height: 1),
                 ListTile(
-                  leading: const Icon(CupertinoIcons.info_circle, color: AppColors.info),
+                  leading: const Icon(CupertinoIcons.info_circle,
+                      color: AppColors.info),
                   title: const Text('About'),
                   trailing: const Icon(CupertinoIcons.chevron_right, size: 16),
                   onTap: () {
@@ -614,11 +633,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const Divider(color: AppColors.secondaryText, height: 1),
                 ListTile(
-                  leading: const Icon(CupertinoIcons.power, color: AppColors.error),
+                  leading:
+                      const Icon(CupertinoIcons.power, color: AppColors.error),
                   title: const Text('Logout'),
                   onTap: () async {
                     await authService.signOut();
-                    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil('/login', (route) => false);
                   },
                 ),
               ],

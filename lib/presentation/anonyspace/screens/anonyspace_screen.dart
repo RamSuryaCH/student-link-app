@@ -50,13 +50,14 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
                   Text(
                     'Post Anonymously',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(CupertinoIcons.xmark_circle,  color: AppColors.secondaryText),
+                    icon: const Icon(CupertinoIcons.xmark_circle,
+                        color: AppColors.secondaryText),
                   ),
                 ],
               ),
@@ -69,12 +70,16 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(CupertinoIcons.info_circle, color: AppColors.warning, size: 20),
+                    const Icon(CupertinoIcons.info_circle,
+                        color: AppColors.warning, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Your identity is hidden, but content is moderated',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(fontSize: 12),
                       ),
                     ),
                   ],
@@ -106,7 +111,7 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
                   onPressed: () async {
                     if (_postController.text.trim().isEmpty) return;
 
-                    final currentUser = authService.userChanges.value;
+                    final currentUser = authService.currentUser;
                     if (currentUser != null) {
                       try {
                         await anonymousPostService.createAnonymousPost(
@@ -171,7 +176,8 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Got it', style: TextStyle(color: AppColors.primary)),
+                      child: const Text('Got it',
+                          style: TextStyle(color: AppColors.primary)),
                     ),
                   ],
                 ),
@@ -192,7 +198,8 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(CupertinoIcons.eye_slash, size: 64, color: AppColors.secondaryText),
+                  const Icon(CupertinoIcons.eye_slash,
+                      size: 64, color: AppColors.secondaryText),
                   const SizedBox(height: 16),
                   Text(
                     'No anonymous posts yet',
@@ -237,13 +244,14 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
   }
 
   Widget _buildAnonymousPostCard(AnonymousPost post) {
-    final currentUser = authService.userChanges.value;
-    final hasUpvoted = currentUser != null && post.upvotedBy.contains(currentUser.uid);
-    final hasDownvoted = currentUser != null && post.downvotedBy.contains(currentUser.uid);
+    final currentUser = authService.currentUser;
+    final hasUpvoted =
+        currentUser != null && post.upvotedBy.contains(currentUser.uid);
+    final hasDownvoted =
+        currentUser != null && post.downvotedBy.contains(currentUser.uid);
 
     return GlassContainer(
       margin: const EdgeInsets.only(bottom: 16),
-      height: null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -256,7 +264,8 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(CupertinoIcons.person_fill, color: Colors.white, size: 20),
+                child: const Icon(CupertinoIcons.person_fill,
+                    color: Colors.white, size: 20),
               ),
               const SizedBox(width: 12),
               Column(
@@ -280,14 +289,16 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
               ),
               const Spacer(),
               PopupMenuButton(
-                icon: const Icon(Icons.more_horiz, color: AppColors.secondaryText),
+                icon: const Icon(Icons.more_horiz,
+                    color: AppColors.secondaryText),
                 color: AppColors.surface,
                 itemBuilder: (context) => [
                   const PopupMenuItem(
                     value: 'report',
                     child: Row(
                       children: [
-                        Icon(CupertinoIcons.exclamationmark_triangle, color: AppColors.error),
+                        Icon(CupertinoIcons.exclamationmark_triangle,
+                            color: AppColors.error),
                         SizedBox(width: 8),
                         Text('Report'),
                       ],
@@ -321,36 +332,46 @@ class _AnonySpaceScreenState extends State<AnonySpaceScreen> {
           Row(
             children: [
               _buildVoteButton(
-                icon: hasUpvoted ? CupertinoIcons.arrow_up_circle_fill : CupertinoIcons.arrow_up_circle,
+                icon: hasUpvoted
+                    ? CupertinoIcons.arrow_up_circle_fill
+                    : CupertinoIcons.arrow_up_circle,
                 count: post.upvotes,
                 color: hasUpvoted ? AppColors.success : AppColors.secondaryText,
                 onTap: () async {
                   if (currentUser != null) {
-                    await anonymousPostService.toggleUpvote(post.id, currentUser.uid);
+                    await anonymousPostService.toggleUpvote(
+                        post.id, currentUser.uid);
                   }
                 },
               ),
               const SizedBox(width: 16),
               _buildVoteButton(
-                icon: hasDownvoted ? CupertinoIcons.arrow_down_circle_fill : CupertinoIcons.arrow_down_circle,
+                icon: hasDownvoted
+                    ? CupertinoIcons.arrow_down_circle_fill
+                    : CupertinoIcons.arrow_down_circle,
                 count: post.downvotes,
                 color: hasDownvoted ? AppColors.error : AppColors.secondaryText,
                 onTap: () async {
                   if (currentUser != null) {
-                    await anonymousPostService.toggleDownvote(post.id, currentUser.uid);
+                    await anonymousPostService.toggleDownvote(
+                        post.id, currentUser.uid);
                   }
                 },
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   'Score: ${post.upvotes - post.downvotes}',
-                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 12),
+                  style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12),
                 ),
               ),
             ],

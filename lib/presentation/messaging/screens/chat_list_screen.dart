@@ -19,8 +19,9 @@ class ChatListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => MessagingBloc(messagingService: getIt<MessagingService>())
-        ..add(const LoadChatRoomsEvent()),
+      create: (context) =>
+          MessagingBloc(messagingService: getIt<MessagingService>())
+            ..add(const LoadChatRoomsEvent()),
       child: const _ChatListContent(),
     );
   }
@@ -58,13 +59,15 @@ class _ChatListContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                  const Icon(Icons.error_outline,
+                      size: 48, color: AppColors.error),
                   const SizedBox(height: 16),
                   Text(state.message),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () =>
-                        context.read<MessagingBloc>().add(const LoadChatRoomsEvent()),
+                    onPressed: () => context
+                        .read<MessagingBloc>()
+                        .add(const LoadChatRoomsEvent()),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -78,7 +81,8 @@ class _ChatListContent extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(CupertinoIcons.chat_bubble_2, size: 64, color: AppColors.secondaryText),
+                    Icon(CupertinoIcons.chat_bubble_2,
+                        size: 64, color: AppColors.secondaryText),
                     SizedBox(height: 16),
                     Text('No messages yet'),
                     Text(
@@ -104,7 +108,8 @@ class _ChatListContent extends StatelessWidget {
                           radius: 28,
                           backgroundColor: AppColors.primary,
                           backgroundImage: chatRoom.otherUserPhotoUrl != null
-                              ? CachedNetworkImageProvider(chatRoom.otherUserPhotoUrl!)
+                              ? CachedNetworkImageProvider(
+                                  chatRoom.otherUserPhotoUrl!)
                               : null,
                           child: chatRoom.otherUserPhotoUrl == null
                               ? const Icon(Icons.person, color: Colors.white)
@@ -121,7 +126,9 @@ class _ChatListContent extends StatelessWidget {
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
-                                chatRoom.unreadCount > 9 ? '9+' : '${chatRoom.unreadCount}',
+                                chatRoom.unreadCount > 9
+                                    ? '9+'
+                                    : '${chatRoom.unreadCount}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,
@@ -133,7 +140,7 @@ class _ChatListContent extends StatelessWidget {
                       ],
                     ),
                     title: Text(
-                      chatRoom.otherUserName,
+                      chatRoom.otherUserName ?? 'Unknown User',
                       style: TextStyle(
                         fontWeight: chatRoom.unreadCount > 0
                             ? FontWeight.bold
@@ -141,7 +148,7 @@ class _ChatListContent extends StatelessWidget {
                       ),
                     ),
                     subtitle: Text(
-                      chatRoom.lastMessage,
+                      chatRoom.lastMessage ?? 'No messages yet',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -150,20 +157,23 @@ class _ChatListContent extends StatelessWidget {
                             : AppColors.secondaryText,
                       ),
                     ),
-                    trailing: Text(
-                      timeago.format(chatRoom.lastMessageTime),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.secondaryText,
-                      ),
-                    ),
+                    trailing: chatRoom.lastMessageTime != null
+                        ? Text(
+                            timeago.format(chatRoom.lastMessageTime!),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.secondaryText,
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChatDetailScreen(
                             chatRoomId: chatRoom.id,
-                            otherUserName: chatRoom.otherUserName,
+                            otherUserName:
+                                chatRoom.otherUserName ?? 'Unknown User',
                             otherUserPhotoUrl: chatRoom.otherUserPhotoUrl,
                           ),
                         ),
